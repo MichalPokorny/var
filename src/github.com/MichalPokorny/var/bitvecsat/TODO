@@ -1,0 +1,13 @@
+* reprezentuj jako union type vsechny mozne operatory: suma, produkt
+* literaly
+* negace, konkatenace
+* zbinarneni ("je to nenula? => 1, else 0")
+* odcitani
+* nasobeni, deleni
+* relacni operatory (> >= < <=)
+* shifty
+* extenze na vetsi vektor
+
+hotovo:
+* scitani
+* and, or, xor

@@ -26,8 +26,6 @@ func (problem *Problem) GetValueInAssignment(assignment sat.Assignment, vectorIn
 	value := 0
 	for i := len(problem.Vectors[vectorIndex].SatVarIndices) - 1; i >= 0; i-- {
 		value = value << 1
-		//fmt.Println(len(assignment))
-		//fmt.Println(problem.Vectors[vectorIndex].SatVarIndices[i])
 		if assignment[problem.Vectors[vectorIndex].SatVarIndices[i]] {
 			value = value | 1
 		}

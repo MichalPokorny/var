@@ -49,10 +49,20 @@ func TestAddition() {
 	plus_constrain := bitvecsat.PlusConstrain{AIndex: a, BIndex: b, SumIndex: c}
 	plus_constrain.AddToProblem(&problem)
 
-	problem.PrepareSat(8)
+	// or_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: bitvecsat.OrConstrain}
+	// or_constrain.AddToProblem(&problem)
+
+	// and_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: bitvecsat.AndConstrain}
+	// and_constrain.AddToProblem(&problem)
+
+	xor_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: bitvecsat.XorConstrain}
+	xor_constrain.AddToProblem(&problem)
+
+	problem.PrepareSat(2)
 	fmt.Println(problem)
 
 	formula := problem.MakeSatFormula()
+	fmt.Println("formula: " + formula.String())
 	forbidders := make([]sat.Clause, 0)
 
 	for {

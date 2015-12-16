@@ -10,12 +10,9 @@ type PlusConstrain struct {
 	SumIndex int
 
 	carryIndex int
-	// A *Vector
-	// B *Vector
-	// Sum *Vector
-
-	// carry *Vector
 }
+
+// TODO: Could we represent this in fewer constrains?
 
 func AddBitSumClause(a int, b int, cIn int, sum int) []sat.Clause {
 	return []sat.Clause{
