@@ -228,9 +228,27 @@ func TestLte(t *testing.T) {
 		a := problem.AddNewVector()
 		b := problem.AddNewVector()
 
-		lte_constrain := bitvecsat.LTEConstrain{AIndex: a, BIndex: b}
+		lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b, Type: bitvecsat.LTE}
 		lte_constrain.AddToProblem(&problem)
 
 		testBinaryRelation(t, uint(width), a, b, problem, relationLte)
 	}
 }
+
+func relationLt(a int, b int, width uint) bool {
+	return a < b;
+}
+
+func TestLt(t *testing.T) {
+	for width := 1; width < 4; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector()
+		b := problem.AddNewVector()
+
+		lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b, Type: bitvecsat.LT}
+		lte_constrain.AddToProblem(&problem)
+
+		testBinaryRelation(t, uint(width), a, b, problem, relationLt)
+	}
+}
+

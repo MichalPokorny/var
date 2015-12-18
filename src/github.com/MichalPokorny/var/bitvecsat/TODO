@@ -4,10 +4,11 @@
 * zbinarneni ("je to nenula? => 1, else 0")
 * odcitani
 * nasobeni, deleni
-* relacni operatory (> >= < <=)
 * shifty
 * extenze na vetsi vektor
+* signed/unsigned (momentalne je vsechno unsigned)
 
 hotovo:
 * scitani
 * and, or, xor
+* relacni operatory (> >= < <=)

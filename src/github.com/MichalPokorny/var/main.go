@@ -45,7 +45,7 @@ func ShowAddition() {
 	a := problem.AddNewVector()
 	b := problem.AddNewVector()
 
-	lte_constrain := bitvecsat.LTEConstrain{AIndex: a, BIndex: b}
+	lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b}
 	lte_constrain.AddToProblem(&problem)
 
 	problem.PrepareSat(3)
@@ -53,7 +53,6 @@ func ShowAddition() {
 	fmt.Println(problem)
 
 	formula := problem.MakeSatFormula()
-	//formula.Clauses = append(formula.Clauses, sat.BitsAlwaysEqual(problem.Vectors[a].SatVarIndices[0], problem.Vectors[b].SatVarIndices[0])...)
 	fmt.Println("formula: " + formula.String())
 	forbidders := make([]sat.Clause, 0)
 

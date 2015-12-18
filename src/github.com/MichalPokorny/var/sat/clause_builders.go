@@ -60,11 +60,6 @@ func LtConstrain(a int, b int, y int) []Clause {
 // TODO: test
 // TODO: optimize
 func BitsAlwaysEqual(a int, b int) []Clause {
-	// a b valid
-	// 0 0 yes
-	// 0 1 no
-	// 1 0 no
-	// 0 0 yes
 	return []Clause{
 		NewClause(true, a, false, b),
 		NewClause(false, a, true, b),
@@ -73,4 +68,8 @@ func BitsAlwaysEqual(a int, b int) []Clause {
 
 func BitIsTrue(a int) []Clause {
 	return []Clause{NewClause(true, a)}
+}
+
+func BitIsFalse(a int) []Clause {
+	return []Clause{NewClause(false, a)}
 }
