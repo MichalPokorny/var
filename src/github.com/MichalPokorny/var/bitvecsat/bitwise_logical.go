@@ -14,16 +14,8 @@ type BitwiseLogicalConstrain struct {
 	BitConstrain BitConstrain
 }
 
-func (constrain BitwiseLogicalConstrain) Materialize(problem *Problem) []sat.Clause {
-	// returns sat.formula
-	// all vectors have proper width (8)
-
-	a := problem.Vectors[constrain.AIndex]
-	b := problem.Vectors[constrain.BIndex]
-	y := problem.Vectors[constrain.YIndex]
-
+func VectorsBitwise(a Vector, b Vector, y Vector, bitConstrain BitConstrain) []sat.Clause {
 	width := a.Width()
-
 	if ((width != b.Width()) || (width != y.Width())) {
 		panic("unequal bit widths")
 	}
@@ -33,38 +25,22 @@ func (constrain BitwiseLogicalConstrain) Materialize(problem *Problem) []sat.Cla
 		a := a.SatVarIndices[i]
 		b := b.SatVarIndices[i]
 		y := y.SatVarIndices[i]
-		clauses = append(clauses, constrain.BitConstrain(a, b, y)...)
+		clauses = append(clauses, bitConstrain(a, b, y)...)
 	}
 	return clauses
 }
 
+func (constrain BitwiseLogicalConstrain) Materialize(problem *Problem) []sat.Clause {
+	// returns sat.formula
+	// all vectors have proper width (8)
+
+	a := problem.Vectors[constrain.AIndex]
+	b := problem.Vectors[constrain.BIndex]
+	y := problem.Vectors[constrain.YIndex]
+
+	return VectorsBitwise(a, b, y, constrain.BitConstrain)
+}
+
 func (constrain BitwiseLogicalConstrain) AddToProblem(problem *Problem) {
 	problem.AddNewConstrain(constrain)
-}
-
-func OrConstrain(a int, b int, y int) []sat.Clause {
-	return []sat.Clause{
-		sat.NewClause(true, a, true, b, false, y),
-		sat.NewClause(false, a, false, b, true, y),
-	}
-}
-
-// TODO: optimize?
-func AndConstrain(a int, b int, y int) []sat.Clause {
-	return []sat.Clause{
-		sat.NewClause(true, a, true, b, false, y),
-		sat.NewClause(true, a, false, b, false, y),
-		sat.NewClause(false, a, true, b, false, y),
-		sat.NewClause(false, a, false, b, true, y),
-	}
-}
-
-// TODO: optimize?
-func XorConstrain(a int, b int, y int) []sat.Clause {
-	return []sat.Clause{
-		sat.NewClause(true, a, true, b, false, y),
-		sat.NewClause(true, a, false, b, true, y),
-		sat.NewClause(false, a, true, b, true, y),
-		sat.NewClause(false, a, false, b, false, y),
-	}
 }

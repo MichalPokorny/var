@@ -22,6 +22,19 @@ func (this Vector) Width() int {
 	return len(this.SatVarIndices)
 }
 
+func (problem *Problem) GetBitsInAssignment(assignment sat.Assignment, vectorIndex int) string {
+	v := ""
+	for i := len(problem.Vectors[vectorIndex].SatVarIndices) - 1; i >= 0; i-- {
+		bit := assignment[problem.Vectors[vectorIndex].SatVarIndices[i]]
+		if bit {
+			v += "1"
+		} else {
+			v += "0"
+		}
+	}
+	return v
+}
+
 func (problem *Problem) GetValueInAssignment(assignment sat.Assignment, vectorIndex int) int {
 	value := 0
 	for i := len(problem.Vectors[vectorIndex].SatVarIndices) - 1; i >= 0; i-- {

@@ -40,28 +40,20 @@ func TestBitCarry() {
 }
 */
 
-func TestAddition() {
+func ShowAddition() {
 	problem := bitvecsat.Problem{}
 	a := problem.AddNewVector()
 	b := problem.AddNewVector()
-	c := problem.AddNewVector()
 
-	plus_constrain := bitvecsat.PlusConstrain{AIndex: a, BIndex: b, SumIndex: c}
-	plus_constrain.AddToProblem(&problem)
+	lte_constrain := bitvecsat.LTEConstrain{AIndex: a, BIndex: b}
+	lte_constrain.AddToProblem(&problem)
 
-	// or_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: bitvecsat.OrConstrain}
-	// or_constrain.AddToProblem(&problem)
+	problem.PrepareSat(3)
 
-	// and_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: bitvecsat.AndConstrain}
-	// and_constrain.AddToProblem(&problem)
-
-	xor_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: bitvecsat.XorConstrain}
-	xor_constrain.AddToProblem(&problem)
-
-	problem.PrepareSat(2)
 	fmt.Println(problem)
 
 	formula := problem.MakeSatFormula()
+	//formula.Clauses = append(formula.Clauses, sat.BitsAlwaysEqual(problem.Vectors[a].SatVarIndices[0], problem.Vectors[b].SatVarIndices[0])...)
 	fmt.Println("formula: " + formula.String())
 	forbidders := make([]sat.Clause, 0)
 
@@ -76,13 +68,19 @@ func TestAddition() {
 
 		aValue := problem.GetValueInAssignment(solution, a)
 		bValue := problem.GetValueInAssignment(solution, b)
-		cValue := problem.GetValueInAssignment(solution, c)
+		//cValue := problem.GetValueInAssignment(solution, c)
 
-		fmt.Println("A=" + strconv.Itoa(aValue) + " B=" + strconv.Itoa(bValue) + " C=" + strconv.Itoa(cValue));
+		aString := problem.GetBitsInAssignment(solution, a)
+		bString := problem.GetBitsInAssignment(solution, b)
+		//cString := problem.GetBitsInAssignment(solution, c)
+
+		//fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString + " C=" + strconv.Itoa(cValue) + "=" + cString);
+		// TODO: fix this!
+		fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString);
 		forbidders = append(forbidders, solution.MakeForbiddingClause())
 	}
 }
 
 func main() {
-	TestAddition()
+	ShowAddition()
 }
