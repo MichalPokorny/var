@@ -6,6 +6,8 @@ import (
 	"sort"
 	"testing"
 	"github.com/MichalPokorny/var/sat"
+	//"github.com/MichalPokorny/var/sat/dfs"
+	"github.com/MichalPokorny/var/sat/dpll"
 	"github.com/MichalPokorny/var/bitvecsat"
 )
 
@@ -76,7 +78,8 @@ func testBinaryOperator(t *testing.T, width uint, a int, b int, c int, problem b
 
 	for {
 		formula.Clauses = append(formula.Clauses, forbidders...)
-		solution := sat.Solve(formula)
+		//solution := dfs.Solve(formula)
+		solution := dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
 		if solution == nil {
 			break
 		}
@@ -215,7 +218,8 @@ func testBinaryRelation(t *testing.T, width uint, a int, b int, problem bitvecsa
 
 	for {
 		formula.Clauses = append(formula.Clauses, forbidders...)
-		solution := sat.Solve(formula)
+		//solution := dfs.Solve(formula)
+		solution := dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
 		if solution == nil {
 			break
 		}

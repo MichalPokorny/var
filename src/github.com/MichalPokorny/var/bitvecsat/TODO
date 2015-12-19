@@ -3,12 +3,17 @@
 * negace, konkatenace
 * zbinarneni ("je to nenula? => 1, else 0")
 * odcitani
-* nasobeni, deleni
-* shifty
+* deleni
+* shifty o promenne cislo
 * extenze na vetsi vektor
 * signed/unsigned (momentalne je vsechno unsigned)
+* unarni minus
+
+* kodovani (<) jako v prednasce: a <[l] b <==> (a -[l] b) <[l] 0
+	minus kodovane jako l-bitova scitacka
 
 hotovo:
 * scitani
 * and, or, xor
 * relacni operatory (> >= < <=)
+* nasobeni (pomale skolni)

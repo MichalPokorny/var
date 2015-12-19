@@ -28,6 +28,18 @@ type Formula struct {
 	Clauses []Clause
 }
 
+func (formula Formula) CountVariables() int {
+	var maxVariable = 0
+	for _, clause := range formula.Clauses {
+		for _, literal := range clause.Literals {
+			if literal.Variable > maxVariable {
+				maxVariable = literal.Variable
+			}
+		}
+	}
+	return maxVariable + 1
+}
+
 func (self Literal) String() string {
 	if self.Positive {
 		return fmt.Sprintf("%d", self.Variable)

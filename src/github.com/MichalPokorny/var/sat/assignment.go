@@ -7,6 +7,14 @@ type PartialAssignment struct {
 	Assigned []bool
 }
 
+func MakeEmptyAssignment(formula Formula) PartialAssignment {
+	varCount := formula.CountVariables()
+	var assignment PartialAssignment
+	assignment.Values = make([]bool, varCount)
+	assignment.Assigned = make([]bool, varCount)
+	return assignment
+}
+
 func (self PartialAssignment) String() string {
 	var s = ""
 	for i := range self.Values {
@@ -22,6 +30,46 @@ func (self PartialAssignment) String() string {
 	}
 	return s
 }
+
+func (assignment PartialAssignment) GetLiteralValue(literal Literal) (known bool, value bool) {
+	if !assignment.Assigned[literal.Variable] {
+		return false, false
+	} else {
+		return true, (literal.Positive == assignment.Values[literal.Variable])
+	}
+}
+
+func (assignment PartialAssignment) GetClauseValue(clause Clause) (known bool, value bool) {
+	var anyUnassigned = false
+	for _, literal := range clause.Literals {
+		assigned, value := assignment.GetLiteralValue(literal)
+		if !assigned {
+			anyUnassigned = true
+		}
+		if value {
+			return true, true
+		}
+	}
+	if anyUnassigned {
+		return false, false
+	} else {
+		return true, false
+	}
+}
+
+func (assignment PartialAssignment) GetFormulaValue(formula Formula) (known bool, value bool) {
+	for _, clause := range formula.Clauses {
+		assigned, value := assignment.GetClauseValue(clause)
+		if !assigned {
+			return false, false
+		}
+		if !value {
+			return true, false
+		}
+	}
+	return true, true
+}
+
 
 func (self Assignment) String() string {
 	var s = ""
