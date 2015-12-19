@@ -41,14 +41,20 @@ func TestBitCarry() {
 */
 
 func ShowAddition() {
+	width := uint(3)
+//	width := uint(2)
 	problem := bitvecsat.Problem{}
-	a := problem.AddNewVector()
-	b := problem.AddNewVector()
+	a := problem.AddNewVector(width)
+	b := problem.AddNewVector(width)
+	c := problem.AddNewVector(width)
 
-	lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b}
-	lte_constrain.AddToProblem(&problem)
+	multiply_constrain := &bitvecsat.MultiplyConstrain{AIndex: a, BIndex: b, ProductIndex: c}
+	multiply_constrain.AddToProblem(&problem)
 
-	problem.PrepareSat(3)
+	//lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b}
+	//lte_constrain.AddToProblem(&problem)
+
+	problem.PrepareSat()
 
 	fmt.Println(problem)
 
@@ -58,6 +64,7 @@ func ShowAddition() {
 
 	for {
 		formula.Clauses = append(formula.Clauses, forbidders...)
+		//fmt.Println(formula.Clauses)
 		solution := sat.Solve(formula)
 		if solution == nil {
 			fmt.Println("No more solutions.")
@@ -65,17 +72,42 @@ func ShowAddition() {
 		}
 		//fmt.Println(solution.String())
 
+
+		fmt.Println(solution, " len=", len(solution))
+		fmt.Println("constrains:")
+		for _, constrain := range(problem.Constrains) {
+			fmt.Println(constrain)
+		}
+		fmt.Println("vectors:")
+		for i, vector := range(problem.Vectors) {
+			fmt.Println("[", i, "]=", vector)
+		}
+
 		aValue := problem.GetValueInAssignment(solution, a)
 		bValue := problem.GetValueInAssignment(solution, b)
-		//cValue := problem.GetValueInAssignment(solution, c)
+		cValue := problem.GetValueInAssignment(solution, c)
 
 		aString := problem.GetBitsInAssignment(solution, a)
 		bString := problem.GetBitsInAssignment(solution, b)
-		//cString := problem.GetBitsInAssignment(solution, c)
+		cString := problem.GetBitsInAssignment(solution, c)
 
-		//fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString + " C=" + strconv.Itoa(cValue) + "=" + cString);
+		fmt.Println("subresults");
+		for i := uint(0); i < width; i++ {
+			value := problem.GetValueInAssignment(solution, multiply_constrain.SubresultIndices[i])
+			bits := problem.GetBitsInAssignment(solution, multiply_constrain.SubresultIndices[i])
+			fmt.Println("[", i, "]=" + strconv.Itoa(value) + "=" + bits);
+		}
+
+		fmt.Println("subsums");
+		for i := uint(0); i < width; i++ {
+			value := problem.GetValueInAssignment(solution, multiply_constrain.SubsumIndices[i])
+			bits := problem.GetBitsInAssignment(solution, multiply_constrain.SubsumIndices[i])
+			fmt.Println("[", i, "]=" + strconv.Itoa(value) + "=" + bits);
+		}
+
+		fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString + " C=" + strconv.Itoa(cValue) + "=" + cString);
 		// TODO: fix this!
-		fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString);
+		//fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString);
 		forbidders = append(forbidders, solution.MakeForbiddingClause())
 	}
 }

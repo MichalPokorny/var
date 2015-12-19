@@ -16,10 +16,7 @@ type Vector struct {
 	// May be nil if the vector's not materialized yet.
 	// TODO: variable width (currently 8)
 	SatVarIndices []int // [0] is least significant bit
-}
-
-func (this Vector) Width() int {
-	return len(this.SatVarIndices)
+	Width uint
 }
 
 func (problem *Problem) GetBitsInAssignment(assignment sat.Assignment, vectorIndex int) string {
@@ -60,8 +57,8 @@ type Problem struct {
 	Constrains []Constrain
 }
 
-func (problem *Problem) AddNewVector() int {
-	problem.Vectors = append(problem.Vectors, Vector{})
+func (problem *Problem) AddNewVector(width uint) int {
+	problem.Vectors = append(problem.Vectors, Vector{Width: width})
 	return len(problem.Vectors) - 1
 }
 
@@ -69,11 +66,11 @@ func (problem *Problem) AddNewConstrain(constrain Constrain) {
 	problem.Constrains = append(problem.Constrains, constrain)
 }
 
-func (problem *Problem) PrepareSat(width int) {
+func (problem *Problem) PrepareSat() {
 	satVar := 0
 	for i := 0; i < len(problem.Vectors); i++ {
-		problem.Vectors[i].SatVarIndices = make([]int, width)
-		for j := 0; j < width; j++ {
+		problem.Vectors[i].SatVarIndices = make([]int, problem.Vectors[i].Width)
+		for j := 0; j < int(problem.Vectors[i].Width); j++ {
 			problem.Vectors[i].SatVarIndices[j] = satVar
 			satVar++
 		}

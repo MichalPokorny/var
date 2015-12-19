@@ -1,6 +1,7 @@
 package bitvecsat
 
 import (
+	"fmt"
 	"github.com/MichalPokorny/var/sat"
 )
 
@@ -15,18 +16,35 @@ type BitwiseLogicalConstrain struct {
 }
 
 func VectorsBitwise(a Vector, b Vector, y Vector, bitConstrain BitConstrain) []sat.Clause {
-	width := a.Width()
-	if ((width != b.Width()) || (width != y.Width())) {
+	width := a.Width
+	if ((width != b.Width) || (width != y.Width)) {
 		panic("unequal bit widths")
 	}
 
 	clauses := make([]sat.Clause, 0) // TODO: exact width
-	for i := 0; i < width; i++ {
+	for i := 0; i < int(width); i++ {
 		a := a.SatVarIndices[i]
 		b := b.SatVarIndices[i]
 		y := y.SatVarIndices[i]
 		clauses = append(clauses, bitConstrain(a, b, y)...)
 	}
+	return clauses
+}
+
+func VectorsAreEqual(a Vector, b Vector) []sat.Clause {
+	width := a.Width
+	if width != b.Width {
+		panic("unequal bit widths")
+	}
+
+	// TODO: exact size
+	clauses := make([]sat.Clause, 0)
+	for i := 0; i < int(width); i++ {
+		aBit := a.SatVarIndices[i]
+		bBit := b.SatVarIndices[i]
+		clauses = append(clauses, sat.BitsAlwaysEqual(aBit, bBit)...)
+	}
+	fmt.Println("VectorsAreEqual", clauses)
 	return clauses
 }
 

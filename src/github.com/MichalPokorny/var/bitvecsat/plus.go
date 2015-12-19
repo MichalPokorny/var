@@ -41,30 +41,23 @@ func AddBitCarryClause(a int, b int, cIn int, cOut int) []sat.Clause {
 }
 
 func (constrain PlusConstrain) Materialize(problem *Problem) []sat.Clause {
-	// returns sat.formula
-	// all vectors have proper width (8)
-
 	a := problem.Vectors[constrain.AIndex]
 	b := problem.Vectors[constrain.BIndex]
 	carry := problem.Vectors[constrain.carryIndex]
 	sum := problem.Vectors[constrain.SumIndex]
 
-	width := a.Width()
-
-	if (width != b.Width()) || (width != sum.Width()) || (width != carry.Width()) {
-		panic("unequal bit widths")
-	}
+	width := a.Width
 
 	clauses := make([]sat.Clause, 0) // TODO: exact width
 	clauses = append(clauses, sat.NewClause(false, carry.SatVarIndices[0]))
-	for i := 0; i < width; i++ {
+	for i := 0; i < int(width); i++ {
 		aIn := a.SatVarIndices[i]
 		bIn := b.SatVarIndices[i]
 		carryIn := carry.SatVarIndices[i]
 		sumOut := sum.SatVarIndices[i]
 		clauses = append(clauses, AddBitSumClause(aIn, bIn, carryIn, sumOut)...)
 
-		if i + 1 < width {
+		if i + 1 < int(width) {
 			carryOut := carry.SatVarIndices[i + 1]
 			clauses = append(clauses, AddBitCarryClause(aIn, bIn, carryIn, carryOut)...)
 		}
@@ -73,6 +66,15 @@ func (constrain PlusConstrain) Materialize(problem *Problem) []sat.Clause {
 }
 
 func (constrain PlusConstrain) AddToProblem(problem *Problem) {
-	constrain.carryIndex = problem.AddNewVector()
+	a := problem.Vectors[constrain.AIndex]
+	b := problem.Vectors[constrain.BIndex]
+	sum := problem.Vectors[constrain.SumIndex]
+	width := a.Width
+
+	if (width != b.Width) || (width != sum.Width) {
+		panic("unequal bit widths")
+	}
+
+	constrain.carryIndex = problem.AddNewVector(width)
 	problem.AddNewConstrain(constrain)
 }

@@ -29,17 +29,14 @@ func (constrain OrderingConstrain) Materialize(problem *Problem) []sat.Clause {
 	suffixMeets := problem.Vectors[constrain.suffixMeetsIndex]
 	nextBitDecides := problem.Vectors[constrain.nextBitDecidesIndex]
 
-	width := a.Width()
-	if ((width != b.Width()) || (width != bitLt.Width()) || (width != bitEq.Width()) || (width != suffixMeets.Width())) {
-		panic("unequal bit widths")
-	}
+	width := a.Width
 
 	clauses := make([]sat.Clause, 0)
 	clauses = append(clauses, VectorsBitwise(a, b, bitLt, sat.LtConstrain)...)
 	clauses = append(clauses, VectorsBitwise(a, b, bitEq, sat.EquivConstrain)...)
 	clauses = append(clauses, VectorsBitwise(bitLt, nextBitDecides, suffixMeets, sat.OrConstrain)...)
 
-	for i := 0; i < width; i++ {
+	for i := 0; i < int(width); i++ {
 		// suffixLTE[i] <=> (a[0..i] <= b[0..i])
 		bitEqBit := bitEq.SatVarIndices[i]
 		nextBitDecidesBit := nextBitDecides.SatVarIndices[i]
@@ -64,9 +61,16 @@ func (constrain OrderingConstrain) Materialize(problem *Problem) []sat.Clause {
 }
 
 func (constrain OrderingConstrain) AddToProblem(problem *Problem) {
-	constrain.bitLtIndex = problem.AddNewVector()
-	constrain.bitEqIndex = problem.AddNewVector()
-	constrain.suffixMeetsIndex = problem.AddNewVector()
-	constrain.nextBitDecidesIndex = problem.AddNewVector()
+	a := problem.Vectors[constrain.AIndex]
+	b := problem.Vectors[constrain.BIndex]
+	width := a.Width
+	if width != b.Width {
+		panic("unequal bit widths")
+	}
+
+	constrain.bitLtIndex = problem.AddNewVector(width)
+	constrain.bitEqIndex = problem.AddNewVector(width)
+	constrain.suffixMeetsIndex = problem.AddNewVector(width)
+	constrain.nextBitDecidesIndex = problem.AddNewVector(width)
 	problem.AddNewConstrain(constrain)
 }
