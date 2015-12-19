@@ -11,6 +11,14 @@ import (
 	"github.com/MichalPokorny/var/bitvecsat"
 )
 
+func solve(formula sat.Formula) sat.Assignment {
+	// DPLL
+	return dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
+
+	// DFS
+	// return dfs.Solve(formula)
+}
+
 type resultSorter struct {
 	Elements [][]int
 }
@@ -63,12 +71,29 @@ func resultSetsEqual(a [][]int, b [][]int) bool {
 	return true
 }
 
+func resultSetContains(results [][]int, result []int) bool {
+	for i := 0; i < len(results); i++ {
+		if intSlicesEqual(results[i], result) {
+			return true
+		}
+	}
+	return false
+}
+
+func getResultsDifference(a [][]int, b [][]int) [][]int {
+	difference := make([][]int, 0)
+	for _, slice := range(a) {
+		if !resultSetContains(b, slice) {
+			difference = append(difference, slice)
+		}
+	}
+	return difference
+}
+
 type binaryOperator func(a, b int, width uint) int;
 
 func testBinaryOperator(t *testing.T, width uint, a int, b int, c int, problem bitvecsat.Problem, operator binaryOperator) {
-	t.Log("Preparing SAT")
 	problem.PrepareSat()
-	t.Log("Making SAT formula")
 	formula := problem.MakeSatFormula()
 	t.Logf("Formula: %v", formula)
 	forbidders := make([]sat.Clause, 0)
@@ -78,8 +103,7 @@ func testBinaryOperator(t *testing.T, width uint, a int, b int, c int, problem b
 
 	for {
 		formula.Clauses = append(formula.Clauses, forbidders...)
-		//solution := dfs.Solve(formula)
-		solution := dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
+		solution := solve(formula)
 		if solution == nil {
 			break
 		}
@@ -110,6 +134,8 @@ func testBinaryOperator(t *testing.T, width uint, a int, b int, c int, problem b
 
 	if !resultSetsEqual(foundSolutions, expectedSolutions) {
 		t.Errorf("unexpected solutions: found %v, expected %v", foundSolutions, expectedSolutions)
+		t.Errorf("extra: %v", getResultsDifference(foundSolutions, expectedSolutions))
+		t.Errorf("missing: %v", getResultsDifference(expectedSolutions, foundSolutions))
 	}
 }
 
@@ -218,8 +244,7 @@ func testBinaryRelation(t *testing.T, width uint, a int, b int, problem bitvecsa
 
 	for {
 		formula.Clauses = append(formula.Clauses, forbidders...)
-		//solution := dfs.Solve(formula)
-		solution := dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
+		solution := solve(formula)
 		if solution == nil {
 			break
 		}
@@ -284,7 +309,7 @@ func operatorMultiply(a int, b int, width uint) int {
 }
 
 func TestMultiplication(t *testing.T) {
-	width := uint(3)
+	width := uint(4)
 
 	problem := bitvecsat.Problem{}
 	a := problem.AddNewVector(width)
@@ -294,8 +319,5 @@ func TestMultiplication(t *testing.T) {
 	mutliply_constrain := bitvecsat.MultiplyConstrain{AIndex: a, BIndex: b, ProductIndex: c}
 	mutliply_constrain.AddToProblem(&problem)
 
-	t.Log("built")
-
 	testBinaryOperator(t, width, a, b, c, problem, operatorMultiply)
 }
-

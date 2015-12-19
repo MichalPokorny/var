@@ -2,7 +2,6 @@ package dfs
 
 import "github.com/MichalPokorny/var/sat"
 
-
 // TODO: We should at least do DPLL
 func Solve(formula sat.Formula) sat.Assignment {
 	assignment := sat.MakeEmptyAssignment(formula)

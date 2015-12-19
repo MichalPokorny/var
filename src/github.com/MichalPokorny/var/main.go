@@ -4,14 +4,24 @@ import (
 	"strconv"
 	"fmt"
 	"github.com/MichalPokorny/var/sat"
-	//"github.com/MichalPokorny/var/sat/dfs"
+	"github.com/MichalPokorny/var/sat/dfs"
 	"github.com/MichalPokorny/var/sat/dpll"
 	"github.com/MichalPokorny/var/bitvecsat"
 )
 
+func solveFormula(formula sat.Formula) sat.Assignment {
+	if false {
+		// DPLL
+		return dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
+	}
+
+	// DFS
+	return dfs.Solve(formula)
+}
+
 func ExhaustAllSolutions(formula sat.Formula) {
 	for {
-		solution := dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
+		solution := solveFormula(formula)
 		if solution == nil {
 			fmt.Println("No more solutions.")
 			break
@@ -22,7 +32,7 @@ func ExhaustAllSolutions(formula sat.Formula) {
 }
 
 func FindOneSolution(formula sat.Formula) {
-	fmt.Println(dpll.Solve(formula, sat.MakeEmptyAssignment(formula)).String())
+	fmt.Println(solveFormula(formula).String())
 }
 
 /*
@@ -67,7 +77,7 @@ func ShowAddition() {
 	for {
 		formula.Clauses = append(formula.Clauses, forbidders...)
 		//fmt.Println(formula.Clauses)
-		solution := dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
+		solution := solveFormula(formula)
 		if solution == nil {
 			fmt.Println("No more solutions.")
 			break
@@ -75,8 +85,8 @@ func ShowAddition() {
 		//fmt.Println(solution.String())
 
 
+		fmt.Println()
 		fmt.Println(solution, " len=", len(solution))
-		/*
 		fmt.Println("constrains:")
 		for _, constrain := range(problem.Constrains) {
 			fmt.Println(constrain)
@@ -85,7 +95,6 @@ func ShowAddition() {
 		for i, vector := range(problem.Vectors) {
 			fmt.Println("[", i, "]=", vector)
 		}
-		*/
 
 		aValue := problem.GetValueInAssignment(solution, a)
 		bValue := problem.GetValueInAssignment(solution, b)
@@ -95,7 +104,6 @@ func ShowAddition() {
 		bString := problem.GetBitsInAssignment(solution, b)
 		cString := problem.GetBitsInAssignment(solution, c)
 
-		/*
 		fmt.Println("subresults");
 		for i := uint(0); i < width; i++ {
 			value := problem.GetValueInAssignment(solution, multiply_constrain.SubresultIndices[i])
@@ -109,7 +117,6 @@ func ShowAddition() {
 			bits := problem.GetBitsInAssignment(solution, multiply_constrain.SubsumIndices[i])
 			fmt.Println("[", i, "]=" + strconv.Itoa(value) + "=" + bits);
 		}
-		*/
 
 		fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString + " C=" + strconv.Itoa(cValue) + "=" + cString);
 		// TODO: fix this!
