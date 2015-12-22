@@ -309,7 +309,10 @@ func operatorMultiply(a int, b int, width uint) int {
 }
 
 func TestMultiplication(t *testing.T) {
-	width := uint(4)
+	// slow
+	// width := uint(4)
+
+	width := uint(3)
 
 	problem := bitvecsat.Problem{}
 	a := problem.AddNewVector(width)
@@ -321,3 +324,25 @@ func TestMultiplication(t *testing.T) {
 
 	testBinaryOperator(t, width, a, b, c, problem, operatorMultiply)
 }
+
+/*
+func operatorShiftLeft(a int, b int, width uint) int {
+	return (a << uint(b)) % (1 << width);
+}
+
+func TestShiftLeft(t *testing.T) {
+	shift := uint(1)
+	width := uint(1 << shift)
+
+	problem := bitvecsat.Problem{}
+	a := problem.AddNewVector(width)
+	b := problem.AddNewVector(shift)
+	c := problem.AddNewVector(width)
+
+	// TODO: maybe get this to work on bigger widths as well, instead?
+	shift_constrain := bitvecsat.ShiftLeftConstrain{AIndex: a, AmountIndex: b, YIndex: c}
+	shift_constrain.AddToProblem(&problem)
+
+	testBinaryOperator(t, width, a, b, c, problem, operatorShiftLeft)
+}
+*/

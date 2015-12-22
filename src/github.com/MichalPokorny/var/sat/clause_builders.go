@@ -73,3 +73,40 @@ func BitIsTrue(a int) []Clause {
 func BitIsFalse(a int) []Clause {
 	return []Clause{NewClause(false, a)}
 }
+
+func BitIfThenElse(result int, condition int, ifTrue int, ifFalse int) []Clause {
+	// TODO: optimize
+	clauses := make([]Clause, 0)
+	for _, resultValue := range([]bool{false, true}) {
+		for _, conditionValue := range([]bool{false, true}) {
+			for _, ifTrueValue := range([]bool{false, true}) {
+				for _, ifFalseValue := range([]bool{false, true}) {
+					var expected bool
+					if conditionValue {
+						expected = ifTrueValue
+					} else {
+						expected = ifFalseValue
+					}
+					isOk := (resultValue == expected)
+					if !isOk {
+						clauses = append(clauses, NewClause(!resultValue, result, !conditionValue, condition, !ifTrueValue, ifTrue, !ifFalseValue, ifFalse))
+					}
+				}
+			}
+		}
+	}
+	return clauses
+	/*
+	return []Clause{
+		NewClause(true, result, true, condition, true, ifTrue, false, ifFalse),
+		NewClause(true, result, true, condition, false, ifTrue, false, ifFalse),
+		NewClause(true, result, false, condition, true, ifTrue, false, ifFalse),
+		NewClause(true, result, false, condition, false, ifTrue, true, ifFalse),
+		NewClause(true, result, false, condition, false, ifTrue, false, ifFalse),
+		NewClause(false, result, true, condition, true, ifTrue, true, ifFalse),
+		NewClause(false, result, true, condition, true, ifTrue, false, ifFalse),
+		NewClause(false, result, false, condition, true, ifTrue, true, ifFalse),
+		NewClause(false, result, false, condition, true, ifTrue, false, ifFalse),
+	}
+	*/
+}

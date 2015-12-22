@@ -53,7 +53,6 @@ func TestBitCarry() {
 */
 
 func ShowAddition() {
-//	width := uint(3)
 	width := uint(2)
 	problem := bitvecsat.Problem{}
 	a := problem.AddNewVector(width)
@@ -62,6 +61,8 @@ func ShowAddition() {
 
 	multiply_constrain := &bitvecsat.MultiplyConstrain{AIndex: a, BIndex: b, ProductIndex: c}
 	multiply_constrain.AddToProblem(&problem)
+	//shift_constrain := &bitvecsat.ShiftLeftConstrain{AIndex: a, AmountIndex: b, YIndex: c}
+	//shift_constrain.AddToProblem(&problem)
 
 	//lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b}
 	//lte_constrain.AddToProblem(&problem)
@@ -85,6 +86,7 @@ func ShowAddition() {
 		//fmt.Println(solution.String())
 
 
+		/*
 		fmt.Println()
 		fmt.Println(solution, " len=", len(solution))
 		fmt.Println("constrains:")
@@ -95,6 +97,7 @@ func ShowAddition() {
 		for i, vector := range(problem.Vectors) {
 			fmt.Println("[", i, "]=", vector)
 		}
+		*/
 
 		aValue := problem.GetValueInAssignment(solution, a)
 		bValue := problem.GetValueInAssignment(solution, b)
@@ -104,19 +107,20 @@ func ShowAddition() {
 		bString := problem.GetBitsInAssignment(solution, b)
 		cString := problem.GetBitsInAssignment(solution, c)
 
-		fmt.Println("subresults");
-		for i := uint(0); i < width; i++ {
-			value := problem.GetValueInAssignment(solution, multiply_constrain.SubresultIndices[i])
-			bits := problem.GetBitsInAssignment(solution, multiply_constrain.SubresultIndices[i])
+		/*
+		fmt.Println("shifted");
+		for i := 0; i < len(shift_constrain.ShiftedIndices); i++ {
+			value := problem.GetValueInAssignment(solution, shift_constrain.ShiftedIndices[i])
+			bits := problem.GetBitsInAssignment(solution, shift_constrain.ShiftedIndices[i])
 			fmt.Println("[", i, "]=" + strconv.Itoa(value) + "=" + bits);
 		}
-
-		fmt.Println("subsums");
-		for i := uint(0); i < width; i++ {
-			value := problem.GetValueInAssignment(solution, multiply_constrain.SubsumIndices[i])
-			bits := problem.GetBitsInAssignment(solution, multiply_constrain.SubsumIndices[i])
+		fmt.Println("maybe-shifted");
+		for i := 0; i < len(shift_constrain.MaybeShiftedIndices); i++ {
+			value := problem.GetValueInAssignment(solution, shift_constrain.MaybeShiftedIndices[i])
+			bits := problem.GetBitsInAssignment(solution, shift_constrain.MaybeShiftedIndices[i])
 			fmt.Println("[", i, "]=" + strconv.Itoa(value) + "=" + bits);
 		}
+		*/
 
 		fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString + " C=" + strconv.Itoa(cValue) + "=" + cString);
 		// TODO: fix this!

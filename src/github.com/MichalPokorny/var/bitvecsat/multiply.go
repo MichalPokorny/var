@@ -38,7 +38,7 @@ func (constrain *MultiplyConstrain) Materialize(problem *Problem) []sat.Clause {
 	return clauses
 }
 
-// TODO: this approach probably creates holes... :(
+// TODO: O(N log N) addition, not O(N^2)
 func (constrain *MultiplyConstrain) AddToProblem(problem *Problem) {
 	a := problem.Vectors[constrain.AIndex]
 	b := problem.Vectors[constrain.BIndex]
