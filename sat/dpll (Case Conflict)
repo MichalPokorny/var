@@ -1,0 +1,7 @@
+* CDCL (conflict-directed clause learning)
+	* DPLL + backtracking driven by conflicts + learning after dead end
+
+clause is *unit*: not satisfied and all but one literal are assigned
+	=> assign last unresolved literal to True
+pure variables (propagation)
+	"said to have large overhead"
