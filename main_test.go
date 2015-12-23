@@ -2,7 +2,7 @@ package main
 
 import (
 	"strconv"
-	//"fmt"
+	"fmt"
 	"sort"
 	"testing"
 	"github.com/MichalPokorny/var/sat"
@@ -237,6 +237,53 @@ func TestEquiv(t *testing.T) {
 	}
 }
 
+type ternaryRelation func(a, b, c int, width uint) bool;
+
+func testTernaryRelation(t *testing.T, width uint, a, b, c int, problem bitvecsat.Problem, relation ternaryRelation) {
+	problem.PrepareSat()
+	formula := problem.MakeSatFormula()
+	forbidders := make([]sat.Clause, 0)
+
+	// Contains tuples of (A, B, C)
+	foundSolutions := make([][]int, 0)
+
+	for {
+		formula.Clauses = append(formula.Clauses, forbidders...)
+		//fmt.Println(formula)
+		solution := solve(formula)
+
+		if solution == nil {
+			break
+		}
+
+		aValue := problem.GetValueInAssignment(solution, a)
+		bValue := problem.GetValueInAssignment(solution, b)
+		cValue := problem.GetValueInAssignment(solution, c)
+
+		t.Log(solution)
+		fmt.Println(solution)
+		fmt.Println(aValue, bValue, cValue)
+
+		foundSolutions = append(foundSolutions, []int{aValue, bValue, cValue})
+		forbidders = append(forbidders, solution.MakeForbiddingClause())
+	}
+
+	expectedSolutions := make([][]int, 0)
+	for a := 0; a < (1 << width); a++ {
+		for b := 0; b < (1 << width); b++ {
+			for c := 0; c < (1 << width); c++ {
+				if relation(a, b, c, width) {
+					expectedSolutions = append(expectedSolutions, []int{a, b, c})
+				}
+			}
+		}
+	}
+
+	if !resultSetsEqual(foundSolutions, expectedSolutions) {
+		t.Errorf("unexpected solutions: found %v, expected %v", foundSolutions, expectedSolutions)
+	}
+}
+
 type binaryRelation func(a, b int, width uint) bool;
 
 func testBinaryRelation(t *testing.T, width uint, a int, b int, problem bitvecsat.Problem, relation binaryRelation) {
@@ -244,10 +291,7 @@ func testBinaryRelation(t *testing.T, width uint, a int, b int, problem bitvecsa
 	formula := problem.MakeSatFormula()
 	forbidders := make([]sat.Clause, 0)
 
-	// t.Log(problem)
-	// t.Log(formula)
-
-	// Contains 3-tuples of (A, B, C)
+	// Contains tuples of (A, B)
 	foundSolutions := make([][]int, 0)
 
 	for {
@@ -270,6 +314,40 @@ func testBinaryRelation(t *testing.T, width uint, a int, b int, problem bitvecsa
 			if relation(a, b, width) {
 				expectedSolutions = append(expectedSolutions, []int{a, b})
 			}
+		}
+	}
+
+	if !resultSetsEqual(foundSolutions, expectedSolutions) {
+		t.Errorf("unexpected solutions: found %v, expected %v", foundSolutions, expectedSolutions)
+	}
+}
+
+type unaryRelation func(a int, width uint) bool;
+
+func testUnaryRelation(t *testing.T, width uint, a int, problem bitvecsat.Problem, relation unaryRelation) {
+	problem.PrepareSat()
+	formula := problem.MakeSatFormula()
+	forbidders := make([]sat.Clause, 0)
+
+	foundSolutions := make([][]int, 0)
+
+	for {
+		formula.Clauses = append(formula.Clauses, forbidders...)
+		solution := solve(formula)
+		if solution == nil {
+			break
+		}
+
+		aValue := problem.GetValueInAssignment(solution, a)
+
+		foundSolutions = append(foundSolutions, []int{aValue})
+		forbidders = append(forbidders, solution.MakeForbiddingClause())
+	}
+
+	expectedSolutions := make([][]int, 0)
+	for a := 0; a < (1 << width); a++ {
+		if relation(a, width) {
+			expectedSolutions = append(expectedSolutions, []int{a})
 		}
 	}
 
@@ -330,6 +408,41 @@ func TestMultiplication(t *testing.T) {
 		testBinaryOperator(t, width, a, b, c, problem, operatorMultiply)
 	}
 }
+
+func TestLiteral(t *testing.T) {
+	width := uint(8)
+	problem := bitvecsat.Problem{}
+	a := problem.AddNewVector(width)
+
+	constrain := bitvecsat.LiteralConstrain{AIndex: a, Value: 193}
+	constrain.AddToProblem(&problem)
+
+	equals93 := func(a int, width uint) bool {
+		return a == 193;
+	}
+
+	testUnaryRelation(t, width, a, problem, equals93)
+}
+
+func TestDivision(t *testing.T) {
+	relationDivide := func(a, b, c int, width uint) bool {
+		return (b != 0) && (a / b == c);
+	}
+
+	for width := uint(1); width <= 3; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
+		ratio := problem.AddNewVector(width)
+
+		constrain := bitvecsat.DivideConstrain{AIndex: a, BIndex: b, RatioIndex: ratio}
+		constrain.AddToProblem(&problem)
+
+		testTernaryRelation(t, width, a, b, ratio, problem, relationDivide)
+	}
+}
+
+// TODO: test modulo
 
 /*
 func operatorShiftLeft(a int, b int, width uint) int {
