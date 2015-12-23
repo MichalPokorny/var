@@ -6,17 +6,25 @@ import (
 	"sort"
 	"testing"
 	"github.com/MichalPokorny/var/sat"
-	//"github.com/MichalPokorny/var/sat/dfs"
+	"github.com/MichalPokorny/var/sat/dfs"
 	"github.com/MichalPokorny/var/sat/dpll"
+	"github.com/MichalPokorny/var/sat/cdcl"
 	"github.com/MichalPokorny/var/bitvecsat"
 )
 
 func solve(formula sat.Formula) sat.Assignment {
-	// DPLL
-	return dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
+	if false {
+		// DPLL
+		return dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
+	}
 
-	// DFS
-	// return dfs.Solve(formula)
+	if false {
+		// DFS
+		return dfs.Solve(formula)
+	}
+
+	// CDCL
+	return cdcl.Solve(formula)
 }
 
 type resultSorter struct {
@@ -144,17 +152,17 @@ func operatorPlus(a int, b int, width uint) int {
 }
 
 func TestAddition(t *testing.T) {
-	width := uint(3)
+	for width := uint(1); width <= 3; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
+		c := problem.AddNewVector(width)
 
-	problem := bitvecsat.Problem{}
-	a := problem.AddNewVector(width)
-	b := problem.AddNewVector(width)
-	c := problem.AddNewVector(width)
+		plus_constrain := bitvecsat.PlusConstrain{AIndex: a, BIndex: b, SumIndex: c}
+		plus_constrain.AddToProblem(&problem)
 
-	plus_constrain := bitvecsat.PlusConstrain{AIndex: a, BIndex: b, SumIndex: c}
-	plus_constrain.AddToProblem(&problem)
-
-	testBinaryOperator(t, width, a, b, c, problem, operatorPlus)
+		testBinaryOperator(t, width, a, b, c, problem, operatorPlus)
+	}
 }
 
 func operatorOr(a int, b int, width uint) int {
@@ -162,17 +170,17 @@ func operatorOr(a int, b int, width uint) int {
 }
 
 func TestOr(t *testing.T) {
-	width := uint(3)
+	for width := uint(1); width <= 3; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
+		c := problem.AddNewVector(width)
 
-	problem := bitvecsat.Problem{}
-	a := problem.AddNewVector(width)
-	b := problem.AddNewVector(width)
-	c := problem.AddNewVector(width)
+		or_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: sat.OrConstrain}
+		or_constrain.AddToProblem(&problem)
 
-	or_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: sat.OrConstrain}
-	or_constrain.AddToProblem(&problem)
-
-	testBinaryOperator(t, width, a, b, c, problem, operatorOr)
+		testBinaryOperator(t, width, a, b, c, problem, operatorOr)
+	}
 }
 
 func operatorAnd(a int, b int, width uint) int {
@@ -180,17 +188,17 @@ func operatorAnd(a int, b int, width uint) int {
 }
 
 func TestAnd(t *testing.T) {
-	width := uint(3)
+	for width := uint(1); width <= 3; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
+		c := problem.AddNewVector(width)
 
-	problem := bitvecsat.Problem{}
-	a := problem.AddNewVector(width)
-	b := problem.AddNewVector(width)
-	c := problem.AddNewVector(width)
+		and_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: sat.AndConstrain}
+		and_constrain.AddToProblem(&problem)
 
-	and_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: sat.AndConstrain}
-	and_constrain.AddToProblem(&problem)
-
-	testBinaryOperator(t, width, a, b, c, problem, operatorAnd)
+		testBinaryOperator(t, width, a, b, c, problem, operatorAnd)
+	}
 }
 
 func operatorXor(a int, b int, width uint) int {
@@ -198,17 +206,17 @@ func operatorXor(a int, b int, width uint) int {
 }
 
 func TestXor(t *testing.T) {
-	width := uint(3)
+	for width := uint(1); width <= 3; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
+		c := problem.AddNewVector(width)
 
-	problem := bitvecsat.Problem{}
-	a := problem.AddNewVector(width)
-	b := problem.AddNewVector(width)
-	c := problem.AddNewVector(width)
+		xor_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: sat.XorConstrain}
+		xor_constrain.AddToProblem(&problem)
 
-	xor_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: sat.XorConstrain}
-	xor_constrain.AddToProblem(&problem)
-
-	testBinaryOperator(t, width, a, b, c, problem, operatorXor)
+		testBinaryOperator(t, width, a, b, c, problem, operatorXor)
+	}
 }
 
 func operatorEquiv(a int, b int, width uint) int {
@@ -216,17 +224,17 @@ func operatorEquiv(a int, b int, width uint) int {
 }
 
 func TestEquiv(t *testing.T) {
-	width := uint(3)
+	for width := uint(1); width <= 3; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
+		c := problem.AddNewVector(width)
 
-	problem := bitvecsat.Problem{}
-	a := problem.AddNewVector(width)
-	b := problem.AddNewVector(width)
-	c := problem.AddNewVector(width)
+		equiv_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: sat.EquivConstrain}
+		equiv_constrain.AddToProblem(&problem)
 
-	equiv_constrain := bitvecsat.BitwiseLogicalConstrain{AIndex: a, BIndex: b, YIndex: c, BitConstrain: sat.EquivConstrain}
-	equiv_constrain.AddToProblem(&problem)
-
-	testBinaryOperator(t, width, a, b, c, problem, operatorEquiv)
+		testBinaryOperator(t, width, a, b, c, problem, operatorEquiv)
+	}
 }
 
 type binaryRelation func(a, b int, width uint) bool;
@@ -275,7 +283,7 @@ func relationLte(a int, b int, width uint) bool {
 }
 
 func TestLte(t *testing.T) {
-	for width := uint(1); width < uint(4); width++ {
+	for width := uint(1); width < 4; width++ {
 		problem := bitvecsat.Problem{}
 		a := problem.AddNewVector(width)
 		b := problem.AddNewVector(width)
@@ -292,15 +300,15 @@ func relationLt(a int, b int, width uint) bool {
 }
 
 func TestLt(t *testing.T) {
-	for width := 1; width < 4; width++ {
+	for width := uint(1); width < 4; width++ {
 		problem := bitvecsat.Problem{}
-		a := problem.AddNewVector(uint(width))
-		b := problem.AddNewVector(uint(width))
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
 
 		lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b, Type: bitvecsat.LT}
 		lte_constrain.AddToProblem(&problem)
 
-		testBinaryRelation(t, uint(width), a, b, problem, relationLt)
+		testBinaryRelation(t, width, a, b, problem, relationLt)
 	}
 }
 
@@ -309,20 +317,18 @@ func operatorMultiply(a int, b int, width uint) int {
 }
 
 func TestMultiplication(t *testing.T) {
-	// slow
-	// width := uint(4)
+//	for width := uint(1); width <= 4; width++ {
+	for width := uint(1); width <= 3; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
+		c := problem.AddNewVector(width)
 
-	width := uint(3)
+		mutliply_constrain := bitvecsat.MultiplyConstrain{AIndex: a, BIndex: b, ProductIndex: c}
+		mutliply_constrain.AddToProblem(&problem)
 
-	problem := bitvecsat.Problem{}
-	a := problem.AddNewVector(width)
-	b := problem.AddNewVector(width)
-	c := problem.AddNewVector(width)
-
-	mutliply_constrain := bitvecsat.MultiplyConstrain{AIndex: a, BIndex: b, ProductIndex: c}
-	mutliply_constrain.AddToProblem(&problem)
-
-	testBinaryOperator(t, width, a, b, c, problem, operatorMultiply)
+		testBinaryOperator(t, width, a, b, c, problem, operatorMultiply)
+	}
 }
 
 /*

@@ -11,7 +11,6 @@
 * unarni minus
 * kodovani (<) jako v prednasce: a <[l] b <==> (a -[l] b) <[l] 0
 	minus kodovane jako l-bitova scitacka
-* CDCL
 
 hotovo:
 * scitani

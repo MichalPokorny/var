@@ -1,9 +1,9 @@
 package cdcl
 
 import (
-//	"os"
+	"os"
 	"strconv"
-//	"log"
+	"log"
 	"sort"
 	"github.com/MichalPokorny/var/sat"
 )
@@ -14,10 +14,10 @@ type partialAssignment struct {
 	Assigned []bool
 }
 
-//var logger *log.Logger
+var logger *log.Logger
 
-func Init() {
-	//logger = log.New(os.Stdout, "cdcl: ", log.Lshortfile)
+func initLogger() {
+	logger = log.New(os.Stdout, "", log.Lshortfile)
 }
 
 const (
@@ -310,7 +310,9 @@ func analyzeConflict(level int, formula *sat.Formula, graph implicationGraph, as
 }
 
 func Solve(formula sat.Formula) sat.Assignment {
-	//logger.Println("starting CDCL:", formula)
+	initLogger()
+
+	//logger.Println("cdcl on:", formula)
 
 	n := formula.CountVariables()
 	assignment := partialAssignment{
@@ -328,18 +330,19 @@ func Solve(formula sat.Formula) sat.Assignment {
 		graph.vertices[i] = implicationVertex{IsDecision: false}
 	}
 
-	time := 0
+	time := -1
 	booleanConstrainPropagation(formula, &assignment, &graph, time)
 	if assignment.hasConflict(formula) {
 		//logger.Println("conflict after first bcp")
 		return nil
 	}
+	time = 0
 
 	for {
 		step := assignment.selectStep()
 		if step == nil {
 			// good, no more variables to assign
-			//logger.Println("no more vars to assign")
+			//logger.Println("no more vars to assign =>", assignment.Values)
 			return assignment.Values
 		}
 
@@ -358,10 +361,11 @@ func Solve(formula sat.Formula) sat.Assignment {
 		booleanConstrainPropagation(formula, &assignment, &graph, time)
 
 		for assignment.hasConflict(formula) {
-			if time == 0 {
+		//	if time == 0 {
+			if time < 0 {
 				// Conflict on level 0.
 				// Cannot backtrack.
-				//logger.Print("conflict on level 0, cannot satisfy")
+				//logger.Print("conflict in formula, cannot satisfy")
 				return nil
 			}
 
