@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/MichalPokorny/var/sat"
 	"github.com/MichalPokorny/var/sat/dfs"
+	"github.com/MichalPokorny/var/sat/cdcl"
 	"github.com/MichalPokorny/var/sat/dpll"
 	"github.com/MichalPokorny/var/bitvecsat"
 )
@@ -15,8 +16,12 @@ func solveFormula(formula sat.Formula) sat.Assignment {
 		return dpll.Solve(formula, sat.MakeEmptyAssignment(formula))
 	}
 
-	// DFS
-	return dfs.Solve(formula)
+	if false {
+		// DFS
+		return dfs.Solve(formula)
+	}
+
+	return cdcl.Solve(formula)
 }
 
 func ExhaustAllSolutions(formula sat.Formula) {
@@ -129,6 +134,28 @@ func ShowAddition() {
 	}
 }
 
+func ShowSat() {
+	formula := sat.Formula{
+		Clauses: []sat.Clause{
+			// example from wiki
+			// https://en.wikipedia.org/wiki/Conflict-Driven_Clause_Learning
+			sat.NewClause(false, 0, true, 1, true, 2),
+			sat.NewClause(true, 0, true, 2, true, 3),
+			sat.NewClause(true, 0, true, 2, false, 3),
+			sat.NewClause(true, 0, false, 2, true, 3),
+			sat.NewClause(true, 0, false, 2, false, 3),
+			sat.NewClause(false, 1, false, 2, true, 3),
+			sat.NewClause(false, 0, true, 1, false, 2),
+			sat.NewClause(false, 0, false, 1, true, 2),
+		},
+	}
+	assignment := cdcl.Solve(formula)
+	fmt.Println(assignment)
+}
+
 func main() {
+	cdcl.Init()
+
 	ShowAddition()
+//	ShowSat()
 }
