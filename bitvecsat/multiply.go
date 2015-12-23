@@ -62,6 +62,12 @@ func (constrain *MultiplyConstrain) AddToProblem(problem *Problem) {
 	constrain.SubsumIndices[0] = constrain.SubresultIndices[0]
 	// Subsum[width - 1] = product
 	constrain.SubsumIndices[width - 1] = constrain.ProductIndex
+
+	if width == 1 {
+		// Extra: also need to set SubresultIndices[0] to product.
+		constrain.SubresultIndices[0] = constrain.ProductIndex
+	}
+
 	for i := 1; i < int(width - 1); i++ {
 		constrain.SubsumIndices[i] = problem.AddNewVector(width)
 	}
