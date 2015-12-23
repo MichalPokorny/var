@@ -1,3 +1,5 @@
+* fix multiplying single bits (the condition doesn't work right now)
+
 * shifty o promenne cislo (WIP)
 
 * reprezentuj jako union type vsechny mozne operatory: suma, produkt
@@ -11,9 +13,3 @@
 * unarni minus
 * kodovani (<) jako v prednasce: a <[l] b <==> (a -[l] b) <[l] 0
 	minus kodovane jako l-bitova scitacka
-
-hotovo:
-* scitani
-* and, or, xor
-* relacni operatory (> >= < <=)
-* nasobeni (pomale skolni)
