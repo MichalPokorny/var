@@ -41,24 +41,67 @@ func FindOneSolution(formula sat.Formula) {
 }
 
 /*
-func TestBitvecsatPrint() {
-	a := bitvecsat.Vector{SatVarIndices: []int{0, 1, 2, 3, 4, 5, 6, 7}}
-	b := bitvecsat.Vector{SatVarIndices: []int{8, 9, 10, 11, 12, 13, 14, 15}}
-	c := bitvecsat.Vector{SatVarIndices: []int{16, 17, 18, 19, 20, 21, 22, 23}}
-	problem := bitvecsat.Problem{Vectors: []bitvecsat.Vector{a, b, c}}
-	fmt.Println(problem)
-}
+// does not seem to work :(
+func ShowPythagoreanTriples() {
+	width := uint(6)
+	problem := bitvecsat.Problem{}
+	a := problem.AddNewVector(width)
+	b := problem.AddNewVector(width)
+	c := problem.AddNewVector(width)
 
-func TestBitCarry() {
-	formula := sat.Formula{
-		Clauses: bitvecsat.AddBitCarryClause(0, 1, 2, 3),
+	asq := problem.AddNewVector(width)
+	bsq := problem.AddNewVector(width)
+	csq := problem.AddNewVector(width)
+
+	constrains := []bitvecsat.Constrain{
+		&bitvecsat.MultiplyConstrain{AIndex: a, BIndex: a, ProductIndex: asq},
+		&bitvecsat.MultiplyConstrain{AIndex: b, BIndex: b, ProductIndex: bsq},
+		&bitvecsat.MultiplyConstrain{AIndex: c, BIndex: c, ProductIndex: csq},
+
+		bitvecsat.PlusConstrain{AIndex: asq, BIndex: bsq, SumIndex: csq},
+
+		bitvecsat.OrderingConstrain{AIndex: a, BIndex: asq, Type: bitvecsat.LT},
+		bitvecsat.OrderingConstrain{AIndex: b, BIndex: bsq, Type: bitvecsat.LT},
+		bitvecsat.OrderingConstrain{AIndex: c, BIndex: csq, Type: bitvecsat.LT},
+
+		bitvecsat.OrderingConstrain{AIndex: a, BIndex: b},
+		bitvecsat.OrderingConstrain{AIndex: b, BIndex: c, Type: bitvecsat.LT},
 	}
-	ExhaustAllSolutions(formula)
+
+	for i, _ := range constrains {
+		constrains[i].AddToProblem(&problem)
+	}
+
+	problem.PrepareSat()
+
+	formula := problem.MakeSatFormula()
+	fmt.Println("formula: " + formula.String())
+	forbidders := make([]sat.Clause, 0)
+
+	for {
+		formula.Clauses = append(formula.Clauses, forbidders...)
+		solution := solveFormula(formula)
+		if solution == nil {
+			fmt.Println("No more solutions.")
+			break
+		}
+
+		aValue := problem.GetValueInAssignment(solution, a)
+		bValue := problem.GetValueInAssignment(solution, b)
+		cValue := problem.GetValueInAssignment(solution, c)
+
+		aString := problem.GetBitsInAssignment(solution, a)
+		bString := problem.GetBitsInAssignment(solution, b)
+		cString := problem.GetBitsInAssignment(solution, c)
+
+		fmt.Println("A=" + strconv.Itoa(aValue) + "=" + aString + " B=" + strconv.Itoa(bValue) + "=" + bString + " C=" + strconv.Itoa(cValue) + "=" + cString);
+		forbidders = append(forbidders, solution.MakeForbiddingClause())
+	}
 }
 */
 
-func ShowAddition() {
-	width := uint(2)
+func Show() {
+	width := uint(4)
 	problem := bitvecsat.Problem{}
 	a := problem.AddNewVector(width)
 	b := problem.AddNewVector(width)
@@ -66,11 +109,12 @@ func ShowAddition() {
 
 	multiply_constrain := &bitvecsat.MultiplyConstrain{AIndex: a, BIndex: b, ProductIndex: c}
 	multiply_constrain.AddToProblem(&problem)
+
 	//shift_constrain := &bitvecsat.ShiftLeftConstrain{AIndex: a, AmountIndex: b, YIndex: c}
 	//shift_constrain.AddToProblem(&problem)
 
-	//lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b}
-	//lte_constrain.AddToProblem(&problem)
+	lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b}
+	lte_constrain.AddToProblem(&problem)
 
 	problem.PrepareSat()
 
@@ -82,14 +126,11 @@ func ShowAddition() {
 
 	for {
 		formula.Clauses = append(formula.Clauses, forbidders...)
-		//fmt.Println(formula.Clauses)
 		solution := solveFormula(formula)
 		if solution == nil {
 			fmt.Println("No more solutions.")
 			break
 		}
-		//fmt.Println(solution.String())
-
 
 		/*
 		fmt.Println()
@@ -154,8 +195,7 @@ func ShowSat() {
 }
 
 func main() {
-	cdcl.Init()
-
-	ShowAddition()
+//	ShowPythagoreanTriples()
+	Show()
 //	ShowSat()
 }

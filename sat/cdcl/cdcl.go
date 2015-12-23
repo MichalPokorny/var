@@ -280,8 +280,12 @@ func analyzeConflict(level int, formula *sat.Formula, graph implicationGraph, as
 
 	for !stopCriterion(clause) {
 		mostRecent := mostRecentNondecisionLiteral(clause)
-		//rlevel := assignment.Times[mostRecent.Variable]
-		//logger.Println("resolving through", mostRecent, "(level=", rlevel, ")")
+
+		/*
+		rlevel := assignment.Times[mostRecent.Variable]
+		logger.Println("resolving through", mostRecent, "(level=", rlevel, ")")
+		*/
+
 		antedescent := graph.getAntedescent(*formula, mostRecent.Variable)
 		//logger.Println("antedescent:", antedescent)
 		clause = resolve(clause, antedescent, mostRecent.Variable)
