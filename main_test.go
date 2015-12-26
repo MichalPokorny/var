@@ -65,9 +65,25 @@ func intSlicesEqual(a []int, b []int) bool {
 	return true
 }
 
+func makeUnique(a [][]int) [][]int {
+	r := make([][]int, 0)
+	r = append(r, a[0])
+	for i := 1; i < len(a); i++ {
+		if !intSlicesEqual(a[i - 1], a[i]) {
+			r = append(r, a[i])
+		}
+	}
+	return r
+}
+
 func resultSetsEqual(a [][]int, b [][]int) bool {
 	sort.Sort(resultSorter{Elements: a})
 	sort.Sort(resultSorter{Elements: b})
+
+	// For example, division may generate multiple solutions.
+	a = makeUnique(a)
+	b = makeUnique(b)
+
 	if len(a) != len(b) {
 		return false
 	}
@@ -280,7 +296,7 @@ func testTernaryRelation(t *testing.T, width uint, a, b, c int, problem bitvecsa
 	}
 
 	if !resultSetsEqual(foundSolutions, expectedSolutions) {
-		t.Errorf("unexpected solutions: found %v, expected %v", foundSolutions, expectedSolutions)
+		t.Fatalf("unexpected solutions: found %v, expected %v", foundSolutions, expectedSolutions)
 	}
 }
 
