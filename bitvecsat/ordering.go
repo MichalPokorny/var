@@ -2,6 +2,7 @@ package bitvecsat
 
 import (
 	"github.com/MichalPokorny/var/sat"
+	"fmt"
 )
 
 // TODO: iota
@@ -13,6 +14,9 @@ type OrderingConstrain struct {
 	AIndex int
 	BIndex int
 	Type int  // LTE or LT
+
+	IsQuery bool  // if true, it's a query, not an assertion
+	QueryResultBitIndex int
 
 	// TODO: maybe fewer variables, bigger conditions?
 	bitLtIndex int
@@ -56,7 +60,12 @@ func (constrain OrderingConstrain) Materialize(problem *Problem) []sat.Clause {
 		}
 	}
 
-	clauses = append(clauses, sat.BitIsTrue(suffixMeets.SatVarIndices[width - 1])...)
+	resultBit := suffixMeets.SatVarIndices[width - 1]
+	if constrain.IsQuery {
+		clauses = append(clauses, sat.BitsAlwaysEqual(resultBit, constrain.QueryResultBitIndex)...)
+	} else {
+		clauses = append(clauses, sat.BitIsTrue(resultBit)...)
+	}
 	return clauses
 }
 
@@ -73,4 +82,22 @@ func (constrain OrderingConstrain) AddToProblem(problem *Problem) {
 	constrain.suffixMeetsIndex = problem.AddNewVector(width)
 	constrain.nextBitDecidesIndex = problem.AddNewVector(width)
 	problem.AddNewConstrain(constrain)
+}
+
+func (constrain OrderingConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
+	var t string
+	if constrain.Type == LTE {
+		t = "<="
+	} else {
+		t = "<"
+	}
+	deciding := fmt.Sprintf("#%d[== %v] %s #%d[== %v]", constrain.AIndex, problem.GetValueInAssignment(assignment, constrain.AIndex), t, constrain.BIndex, problem.GetValueInAssignment(assignment, constrain.BIndex))
+	str := "ordering("
+	if constrain.IsQuery {
+		str += fmt.Sprintf("[%s] <=> bit %d [== %v]", deciding, constrain.QueryResultBitIndex, assignment[constrain.QueryResultBitIndex])
+	} else {
+		str += deciding
+	}
+	str += ")"
+	return str
 }

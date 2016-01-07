@@ -47,34 +47,44 @@ func (problem *Problem) GetValueInAssignment(assignment sat.Assignment, vectorIn
 // func And(inputs, output) Constrain
 
 type Constrain interface {
-	AddToProblem(problem *Problem)
-	// TODO: partial materialization
 	Materialize(problem *Problem) []sat.Clause
+	Dump(problem *Problem, assignment sat.Assignment) string
 }
 
 type Problem struct {
 	Vectors []Vector
 	Constrains []Constrain
+
+	LastSatVarIndex int
 }
 
 func (problem *Problem) AddNewVector(width uint) int {
-	problem.Vectors = append(problem.Vectors, Vector{Width: width})
+	vector := Vector{
+		Width: width,
+		SatVarIndices: make([]int, width),
+	}
+	for i := 0; i < int(width); i++ {
+		vector.SatVarIndices[i] = problem.LastSatVarIndex
+		problem.LastSatVarIndex++
+	}
+	problem.Vectors = append(problem.Vectors, vector)
+	return len(problem.Vectors) - 1
+}
+
+func (problem *Problem) AddBoundVector(width uint, indices []int) int {
+	vector := Vector{
+		Width: width,
+		SatVarIndices: indices,
+	}
+	if width != uint(len(indices)) {
+		panic("bad width")
+	}
+	problem.Vectors = append(problem.Vectors, vector)
 	return len(problem.Vectors) - 1
 }
 
 func (problem *Problem) AddNewConstrain(constrain Constrain) {
 	problem.Constrains = append(problem.Constrains, constrain)
-}
-
-func (problem *Problem) PrepareSat() {
-	satVar := 0
-	for i := 0; i < len(problem.Vectors); i++ {
-		problem.Vectors[i].SatVarIndices = make([]int, problem.Vectors[i].Width)
-		for j := 0; j < int(problem.Vectors[i].Width); j++ {
-			problem.Vectors[i].SatVarIndices[j] = satVar
-			satVar++
-		}
-	}
 }
 
 func (problem *Problem) MakeSatFormula() sat.Formula {

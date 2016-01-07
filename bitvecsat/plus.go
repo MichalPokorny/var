@@ -78,3 +78,7 @@ func (constrain PlusConstrain) AddToProblem(problem *Problem) {
 	constrain.carryIndex = problem.AddNewVector(width)
 	problem.AddNewConstrain(constrain)
 }
+
+func (constrain PlusConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
+	return "plus (not implemented)"
+}

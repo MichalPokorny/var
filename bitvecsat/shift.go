@@ -1,5 +1,7 @@
 package bitvecsat
 
+// TODO: right shift
+
 import (
 	"fmt"
 	"github.com/MichalPokorny/var/sat"
@@ -90,4 +92,8 @@ func (constrain *ShiftLeftConstrain) AddToProblem(problem *Problem) {
 	// TODO: barrel shifter
 
 	problem.AddNewConstrain(constrain)
+}
+
+func (constrain *ShiftLeftConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
+	return "shift left (not implemented)"
 }

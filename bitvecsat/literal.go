@@ -26,3 +26,7 @@ func (constrain *LiteralConstrain) AddToProblem(problem *Problem) {
 	}
 	problem.AddNewConstrain(constrain)
 }
+
+func (constrain *LiteralConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
+	return "literal (not implemented)"
+}

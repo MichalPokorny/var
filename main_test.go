@@ -117,7 +117,6 @@ func getResultsDifference(a [][]int, b [][]int) [][]int {
 type binaryOperator func(a, b int, width uint) int;
 
 func testBinaryOperator(t *testing.T, width uint, a int, b int, c int, problem bitvecsat.Problem, operator binaryOperator) {
-	problem.PrepareSat()
 	formula := problem.MakeSatFormula()
 	t.Logf("Formula: %v", formula)
 	forbidders := make([]sat.Clause, 0)
@@ -256,7 +255,6 @@ func TestEquiv(t *testing.T) {
 type ternaryRelation func(a, b, c int, width uint) bool;
 
 func testTernaryRelation(t *testing.T, width uint, a, b, c int, problem bitvecsat.Problem, relation ternaryRelation) {
-	problem.PrepareSat()
 	formula := problem.MakeSatFormula()
 	forbidders := make([]sat.Clause, 0)
 
@@ -265,7 +263,7 @@ func testTernaryRelation(t *testing.T, width uint, a, b, c int, problem bitvecsa
 
 	for {
 		formula.Clauses = append(formula.Clauses, forbidders...)
-		//fmt.Println(formula)
+		t.Log(formula)
 		solution := solve(formula)
 
 		if solution == nil {
@@ -277,7 +275,6 @@ func testTernaryRelation(t *testing.T, width uint, a, b, c int, problem bitvecsa
 		cValue := problem.GetValueInAssignment(solution, c)
 
 		t.Log(solution)
-		fmt.Println(solution)
 		fmt.Println(aValue, bValue, cValue)
 
 		foundSolutions = append(foundSolutions, []int{aValue, bValue, cValue})
@@ -303,7 +300,6 @@ func testTernaryRelation(t *testing.T, width uint, a, b, c int, problem bitvecsa
 type binaryRelation func(a, b int, width uint) bool;
 
 func testBinaryRelation(t *testing.T, width uint, a int, b int, problem bitvecsat.Problem, relation binaryRelation) {
-	problem.PrepareSat()
 	formula := problem.MakeSatFormula()
 	forbidders := make([]sat.Clause, 0)
 
@@ -341,7 +337,6 @@ func testBinaryRelation(t *testing.T, width uint, a int, b int, problem bitvecsa
 type unaryRelation func(a int, width uint) bool;
 
 func testUnaryRelation(t *testing.T, width uint, a int, problem bitvecsat.Problem, relation unaryRelation) {
-	problem.PrepareSat()
 	formula := problem.MakeSatFormula()
 	forbidders := make([]sat.Clause, 0)
 
@@ -444,17 +439,33 @@ func TestDivision(t *testing.T) {
 	relationDivide := func(a, b, c int, width uint) bool {
 		return (b != 0) && (a / b == c);
 	}
-
-	for width := uint(1); width <= 3; width++ {
+	for width := uint(2); width <= 4; width++ {
 		problem := bitvecsat.Problem{}
 		a := problem.AddNewVector(width)
 		b := problem.AddNewVector(width)
 		ratio := problem.AddNewVector(width)
 
-		constrain := bitvecsat.DivideConstrain{AIndex: a, BIndex: b, RatioIndex: ratio}
-		constrain.AddToProblem(&problem)
+		c := bitvecsat.DivideConstrain{AIndex: a, BIndex: b, RatioIndex: ratio}
+		c.AddToProblem(&problem)
 
 		testTernaryRelation(t, width, a, b, ratio, problem, relationDivide)
+	}
+}
+
+func TestModulo(t *testing.T) {
+	relationModulo := func(a, b, c int, width uint) bool {
+		return (b != 0) && (a % b == c);
+	}
+	for width := uint(2); width <= 4; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector(width)
+		b := problem.AddNewVector(width)
+		remainder := problem.AddNewVector(width)
+
+		c := bitvecsat.DivideConstrain{AIndex: a, BIndex: b, RemainderIndex: remainder}
+		c.AddToProblem(&problem)
+
+		testTernaryRelation(t, width, a, b, ratio, problem, relationModulo)
 	}
 }
 

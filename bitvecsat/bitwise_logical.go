@@ -62,3 +62,7 @@ func (constrain BitwiseLogicalConstrain) Materialize(problem *Problem) []sat.Cla
 func (constrain BitwiseLogicalConstrain) AddToProblem(problem *Problem) {
 	problem.AddNewConstrain(constrain)
 }
+
+func (constrain BitwiseLogicalConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
+	return "bitwise_logical (not implemented)"
+}

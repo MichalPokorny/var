@@ -72,8 +72,6 @@ func ShowPythagoreanTriples() {
 		constrains[i].AddToProblem(&problem)
 	}
 
-	problem.PrepareSat()
-
 	formula := problem.MakeSatFormula()
 	fmt.Println("formula: " + formula.String())
 	forbidders := make([]sat.Clause, 0)
@@ -115,8 +113,6 @@ func Show() {
 
 	lte_constrain := bitvecsat.OrderingConstrain{AIndex: a, BIndex: b}
 	lte_constrain.AddToProblem(&problem)
-
-	problem.PrepareSat()
 
 	fmt.Println(problem)
 

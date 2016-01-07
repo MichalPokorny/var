@@ -83,3 +83,7 @@ func (constrain *MultiplyConstrain) AddToProblem(problem *Problem) {
 
 	problem.AddNewConstrain(constrain)
 }
+
+func (constrain *MultiplyConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
+	return "multiply (not implemented)"
+}

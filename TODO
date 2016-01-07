@@ -1,12 +1,9 @@
-* test na modulo constrain -- vypada, ze nefunguje
 * shifty o promenne cislo (WIP)
 
 * reprezentuj jako union type vsechny mozne operatory: suma, produkt
-* literaly
 * negace, konkatenace
 * zbinarneni ("je to nenula? => 1, else 0")
 * odcitani
-* deleni
 * extenze na vetsi vektor
 * signed/unsigned (momentalne je vsechno unsigned)
 * unarni minus
