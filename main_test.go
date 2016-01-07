@@ -406,7 +406,6 @@ func operatorMultiply(a int, b int, width uint) int {
 }
 
 func TestMultiplication(t *testing.T) {
-//	for width := uint(1); width <= 4; width++ {
 	for width := uint(1); width <= 3; width++ {
 		problem := bitvecsat.Problem{}
 		a := problem.AddNewVector(width)
@@ -439,7 +438,7 @@ func TestDivision(t *testing.T) {
 	relationDivide := func(a, b, c int, width uint) bool {
 		return (b != 0) && (a / b == c);
 	}
-	for width := uint(2); width <= 4; width++ {
+	for width := uint(1); width <= 3; width++ {
 		problem := bitvecsat.Problem{}
 		a := problem.AddNewVector(width)
 		b := problem.AddNewVector(width)
@@ -456,7 +455,7 @@ func TestModulo(t *testing.T) {
 	relationModulo := func(a, b, c int, width uint) bool {
 		return (b != 0) && (a % b == c);
 	}
-	for width := uint(2); width <= 4; width++ {
+	for width := uint(1); width <= 3; width++ {
 		problem := bitvecsat.Problem{}
 		a := problem.AddNewVector(width)
 		b := problem.AddNewVector(width)
@@ -465,7 +464,7 @@ func TestModulo(t *testing.T) {
 		c := bitvecsat.DivideConstrain{AIndex: a, BIndex: b, RemainderIndex: remainder}
 		c.AddToProblem(&problem)
 
-		testTernaryRelation(t, width, a, b, ratio, problem, relationModulo)
+		testTernaryRelation(t, width, a, b, remainder, problem, relationModulo)
 	}
 }
 
