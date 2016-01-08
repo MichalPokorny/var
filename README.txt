@@ -4,3 +4,4 @@ The following works:
 	* Ordering (> >= < <=)
 	* Multiplication
 	* Division
+	* Literal assignment

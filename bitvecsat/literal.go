@@ -7,7 +7,7 @@ type LiteralConstrain struct {
 	Value int
 }
 
-func (constrain *LiteralConstrain) Materialize(problem *Problem) []sat.Clause {
+func (constrain LiteralConstrain) Materialize(problem *Problem) []sat.Clause {
 	a := problem.Vectors[constrain.AIndex]
 	width := a.Width
 	clauses := make([]sat.Clause, width)
@@ -18,7 +18,7 @@ func (constrain *LiteralConstrain) Materialize(problem *Problem) []sat.Clause {
 	return clauses
 }
 
-func (constrain *LiteralConstrain) AddToProblem(problem *Problem) {
+func (constrain LiteralConstrain) AddToProblem(problem *Problem) {
 	a := problem.Vectors[constrain.AIndex]
 	width := a.Width
 	if constrain.Value >= (1 << width) {
@@ -27,6 +27,6 @@ func (constrain *LiteralConstrain) AddToProblem(problem *Problem) {
 	problem.AddNewConstrain(constrain)
 }
 
-func (constrain *LiteralConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
+func (constrain LiteralConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
 	return "literal (not implemented)"
 }
