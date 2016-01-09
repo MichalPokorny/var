@@ -13,7 +13,8 @@ type ShiftLeftConstrain struct {
 	YIndex int
 
 	MaybeShiftedIndices []int
-	ShiftedIndices []int
+
+	constantZeroIndex int
 }
 
 func (constrain *ShiftLeftConstrain) Materialize(problem *Problem) []sat.Clause {
@@ -25,10 +26,15 @@ func (constrain *ShiftLeftConstrain) Materialize(problem *Problem) []sat.Clause 
 	width := a.Width
 
 	clauses := make([]sat.Clause, 0)
-	for i := uint(0); (1 << i) < width; i++ {
+
+	maxShift := uint(0)
+	for i := uint(0); (1 << i) <= width; i++ {
+		maxShift = i
+	}
+
+	for i := uint(0); i < maxShift; i++ {
 		shift := uint(1 << i)
 
-		shiftedPrevious := problem.Vectors[constrain.ShiftedIndices[i]]
 		maybeShiftedCurrent := problem.Vectors[constrain.MaybeShiftedIndices[i]]
 
 		var previous Vector
@@ -38,13 +44,17 @@ func (constrain *ShiftLeftConstrain) Materialize(problem *Problem) []sat.Clause 
 			previous = problem.Vectors[constrain.MaybeShiftedIndices[i - 1]]
 		}
 
+		shiftedPrevious := Vector{
+			Width: width,
+			SatVarIndices: make([]int, shift),
+		}
+		for i := 0; i < int(shift); i++ {
+			shiftedPrevious.SatVarIndices[i] = constrain.constantZeroIndex
+		}
+		shiftedPrevious.SatVarIndices = append(
+			shiftedPrevious.SatVarIndices,
+			previous.SatVarIndices[0:width - shift]...)
 		for j := uint(0); j < width; j++ {
-			if j < shift {
-				clauses = append(clauses, sat.BitIsFalse(shiftedPrevious.SatVarIndices[j])...)
-			} else {
-				clauses = append(clauses, sat.BitsAlwaysEqual(shiftedPrevious.SatVarIndices[j], previous.SatVarIndices[j - shift])...)
-			}
-
 			clauses = append(clauses, sat.BitIfThenElse(maybeShiftedCurrent.SatVarIndices[j], amount.SatVarIndices[i], shiftedPrevious.SatVarIndices[j], previous.SatVarIndices[j])...)
 		}
 	}
@@ -70,30 +80,50 @@ func (constrain *ShiftLeftConstrain) AddToProblem(problem *Problem) {
 		maxShift = i
 	}
 
-	// TODO: check width of 'amount'!
-	if maxShift != amount.Width {
-		fmt.Println("got", amount.Width, "expected", maxShift)
-		panic("wrong width of amount")
+	if amount.Width < maxShift {
+		panic(fmt.Sprintf("wrong width of amount (got %d, expected at least %d)", amount.Width, maxShift))
 	}
 
-	constrain.ShiftedIndices = make([]int, maxShift + 1)
 	constrain.MaybeShiftedIndices = make([]int, maxShift + 1)
 
-	for i := uint(0); (1 << i) <= width; i++ {
-		constrain.ShiftedIndices[i] = problem.AddNewVector(width)
-		if i == maxShift {
+	for i := uint(0); i < maxShift; i++ {
+		if i == maxShift - 1 {
 			constrain.MaybeShiftedIndices[i] = constrain.YIndex
 		} else {
 			constrain.MaybeShiftedIndices[i] = problem.AddNewVector(width)
 		}
 	}
 
-
-	// TODO: barrel shifter
+	idx := problem.AddNewVector(1)
+	LiteralConstrain{AIndex: idx, Value: 0}.AddToProblem(problem)
+	constrain.constantZeroIndex = problem.Vectors[idx].SatVarIndices[0]
 
 	problem.AddNewConstrain(constrain)
+
 }
 
 func (constrain *ShiftLeftConstrain) Dump(problem *Problem, assignment sat.Assignment) string {
-	return "shift left (not implemented)"
+	str := fmt.Sprintf("shift_left(#%d[== %d] << #%d[== %d] = #%d[== %d])",
+		constrain.AIndex,
+		problem.GetValueInAssignment(assignment, constrain.AIndex),
+		constrain.AmountIndex,
+		problem.GetValueInAssignment(assignment, constrain.AmountIndex),
+		constrain.YIndex,
+		problem.GetValueInAssignment(assignment, constrain.YIndex))
+
+	a := problem.Vectors[constrain.AIndex]
+	width := a.Width
+	str += fmt.Sprintf("\n%v\n", problem.Vectors)
+	str += fmt.Sprintf("\n%v\n", assignment)
+
+	maxShift := uint(0)
+	for i := uint(0); (1 << i) <= width; i++ {
+		maxShift = i
+	}
+
+	for i := uint(0); i < maxShift; i++ {
+		str += fmt.Sprintf("\nmaybeShiftedIndices[%d]=%d", i, problem.GetValueInAssignment(assignment, constrain.MaybeShiftedIndices[i]))
+	}
+
+	return str
 }

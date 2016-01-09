@@ -151,14 +151,23 @@ func testBinaryOperator(t *testing.T, width uint, a int, b int, c int, problem b
 	for a := 0; a < (1 << width); a++ {
 		for b := 0; b < (1 << width); b++ {
 			c := operator(a, b, width)
-			expectedSolutions = append(expectedSolutions, []int{a, b, c})
+			if c >= 0 {
+				// c < 0 means "outside defined inputs"
+				expectedSolutions = append(expectedSolutions, []int{a, b, c})
+			}
 		}
 	}
 
 	if !resultSetsEqual(foundSolutions, expectedSolutions) {
 		t.Errorf("unexpected solutions: found %v, expected %v", foundSolutions, expectedSolutions)
-		t.Errorf("extra: %v", getResultsDifference(foundSolutions, expectedSolutions))
-		t.Errorf("missing: %v", getResultsDifference(expectedSolutions, foundSolutions))
+		extra := getResultsDifference(foundSolutions, expectedSolutions)
+		if len(extra) > 0 {
+			t.Errorf("extra: %v", extra)
+		}
+		missing := getResultsDifference(expectedSolutions, foundSolutions)
+		if len(missing) > 0 {
+			t.Errorf("missing: %v", missing)
+		}
 	}
 }
 
@@ -468,20 +477,61 @@ func TestModulo(t *testing.T) {
 	}
 }
 
-// TODO: test modulo
-
-/*
-func operatorShiftLeft(a int, b int, width uint) int {
-	return (a << uint(b)) % (1 << width);
-}
-
-func TestShiftLeft(t *testing.T) {
+func TestShiftLeftZero(t *testing.T) {
+	// 0 << 1 = 0
 	shift := uint(1)
 	width := uint(1 << shift)
 
 	problem := bitvecsat.Problem{}
 	a := problem.AddNewVector(width)
+	bitvecsat.LiteralConstrain{AIndex: a, Value: 0}.AddToProblem(&problem)
+
 	b := problem.AddNewVector(shift)
+	bitvecsat.LiteralConstrain{AIndex: b, Value: 0}.AddToProblem(&problem)
+
+	c := problem.AddNewVector(width)
+
+	// TODO: maybe get this to work on bigger widths as well, instead?
+	shift_constrain := bitvecsat.ShiftLeftConstrain{AIndex: a, AmountIndex: b, YIndex: c}
+	shift_constrain.AddToProblem(&problem)
+
+	formula := problem.MakeSatFormula()
+	forbidders := make([]sat.Clause, 0)
+
+	for {
+		formula.Clauses = append(formula.Clauses, forbidders...)
+		t.Log(formula)
+		solution := solve(formula)
+
+		if solution == nil {
+			break
+		}
+
+		aValue := problem.GetValueInAssignment(solution, a)
+		bValue := problem.GetValueInAssignment(solution, b)
+		cValue := problem.GetValueInAssignment(solution, c)
+
+		t.Log(solution)
+		t.Log(shift_constrain.Dump(&problem, solution))
+		fmt.Println(aValue, bValue, cValue)
+		forbidders = append(forbidders, solution.MakeForbiddingClause())
+	}
+}
+
+func TestShiftLeft(t *testing.T) {
+	shift := uint(2)
+	width := uint(1 << shift)
+
+	operatorShiftLeft := func(a int, b int, width uint) int {
+		// Upper bits of actualShift are ignored, as on x86 CPUs
+		// or in the C language.
+		actualShift := (uint(b) % width)
+		return (a << actualShift) % (1 << width);
+	}
+
+	problem := bitvecsat.Problem{}
+	a := problem.AddNewVector(width)
+	b := problem.AddNewVector(width)
 	c := problem.AddNewVector(width)
 
 	// TODO: maybe get this to work on bigger widths as well, instead?
@@ -490,4 +540,3 @@ func TestShiftLeft(t *testing.T) {
 
 	testBinaryOperator(t, width, a, b, c, problem, operatorShiftLeft)
 }
-*/
