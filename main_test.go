@@ -477,47 +477,6 @@ func TestModulo(t *testing.T) {
 	}
 }
 
-func TestShiftLeftZero(t *testing.T) {
-	// 0 << 1 = 0
-	shift := uint(1)
-	width := uint(1 << shift)
-
-	problem := bitvecsat.Problem{}
-	a := problem.AddNewVector(width)
-	bitvecsat.LiteralConstrain{AIndex: a, Value: 0}.AddToProblem(&problem)
-
-	b := problem.AddNewVector(shift)
-	bitvecsat.LiteralConstrain{AIndex: b, Value: 0}.AddToProblem(&problem)
-
-	c := problem.AddNewVector(width)
-
-	// TODO: maybe get this to work on bigger widths as well, instead?
-	shift_constrain := bitvecsat.ShiftLeftConstrain{AIndex: a, AmountIndex: b, YIndex: c}
-	shift_constrain.AddToProblem(&problem)
-
-	formula := problem.MakeSatFormula()
-	forbidders := make([]sat.Clause, 0)
-
-	for {
-		formula.Clauses = append(formula.Clauses, forbidders...)
-		t.Log(formula)
-		solution := solve(formula)
-
-		if solution == nil {
-			break
-		}
-
-		aValue := problem.GetValueInAssignment(solution, a)
-		bValue := problem.GetValueInAssignment(solution, b)
-		cValue := problem.GetValueInAssignment(solution, c)
-
-		t.Log(solution)
-		t.Log(shift_constrain.Dump(&problem, solution))
-		fmt.Println(aValue, bValue, cValue)
-		forbidders = append(forbidders, solution.MakeForbiddingClause())
-	}
-}
-
 func TestShiftLeft(t *testing.T) {
 	shift := uint(2)
 	width := uint(1 << shift)
@@ -534,9 +493,28 @@ func TestShiftLeft(t *testing.T) {
 	b := problem.AddNewVector(width)
 	c := problem.AddNewVector(width)
 
-	// TODO: maybe get this to work on bigger widths as well, instead?
 	shift_constrain := bitvecsat.ShiftLeftConstrain{AIndex: a, AmountIndex: b, YIndex: c}
 	shift_constrain.AddToProblem(&problem)
 
 	testBinaryOperator(t, width, a, b, c, problem, operatorShiftLeft)
+}
+
+func TestShiftRight(t *testing.T) {
+	shift := uint(2)
+	width := uint(1 << shift)
+
+	operatorShiftRight := func(a int, b int, width uint) int {
+		actualShift := (uint(b) % width)
+		return (a >> actualShift) % (1 << width);
+	}
+
+	problem := bitvecsat.Problem{}
+	a := problem.AddNewVector(width)
+	b := problem.AddNewVector(width)
+	c := problem.AddNewVector(width)
+
+	shift_constrain := bitvecsat.ShiftRightConstrain{AIndex: a, AmountIndex: b, YIndex: c}
+	shift_constrain.AddToProblem(&problem)
+
+	testBinaryOperator(t, width, a, b, c, problem, operatorShiftRight)
 }
