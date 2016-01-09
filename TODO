@@ -1,5 +1,3 @@
-* shifty o promenne cislo (WIP)
-
 * reprezentuj jako union type vsechny mozne operatory: suma, produkt
 * negace, konkatenace
 * zbinarneni ("je to nenula? => 1, else 0")
