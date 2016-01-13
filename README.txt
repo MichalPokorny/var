@@ -16,5 +16,6 @@ The following works:
 	* Literal assignment
 	* Left and right shift (<< >>); large bits in amount are ignored (as in x86)
 	* Nonzero
+	* Hamming weight (i.e., popcount)
 
 Equality and nonequality can be composed from bitwise XOR and nonzero.
