@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"testing"
+	"github.com/cznic/mathutil"
 	"github.com/MichalPokorny/var/sat"
 	"github.com/MichalPokorny/var/sat/dfs"
 	"github.com/MichalPokorny/var/sat/dpll"
@@ -376,11 +377,11 @@ func testUnaryRelation(t *testing.T, width uint, a int, problem bitvecsat.Proble
 	}
 }
 
-func relationLte(a int, b int, width uint) bool {
-	return a <= b;
-}
-
 func TestLte(t *testing.T) {
+	relationLte := func(a int, b int, width uint) bool {
+		return a <= b;
+	}
+
 	for width := uint(1); width < 4; width++ {
 		problem := bitvecsat.Problem{}
 		a := problem.AddNewVector(width)
@@ -393,11 +394,11 @@ func TestLte(t *testing.T) {
 	}
 }
 
-func relationLt(a int, b int, width uint) bool {
-	return a < b;
-}
-
 func TestLt(t *testing.T) {
+	relationLt := func(a int, b int, width uint) bool {
+		return a < b;
+	}
+
 	for width := uint(1); width < 4; width++ {
 		problem := bitvecsat.Problem{}
 		a := problem.AddNewVector(width)
@@ -410,11 +411,11 @@ func TestLt(t *testing.T) {
 	}
 }
 
-func operatorMultiply(a int, b int, width uint) int {
-	return (a * b) % (1 << width);
-}
-
 func TestMultiplication(t *testing.T) {
+	operatorMultiply := func(a int, b int, width uint) int {
+		return (a * b) % (1 << width);
+	}
+
 	for width := uint(1); width <= 3; width++ {
 		problem := bitvecsat.Problem{}
 		a := problem.AddNewVector(width)
@@ -517,4 +518,22 @@ func TestShiftRight(t *testing.T) {
 	shift_constrain.AddToProblem(&problem)
 
 	testBinaryOperator(t, width, a, b, c, problem, operatorShiftRight)
+}
+
+func TestHammingWeight(t *testing.T) {
+	relationPopcount := func(a, w int, width uint) bool {
+		popcount := mathutil.PopCount(a)
+		return popcount == w
+	}
+
+	for width := uint(1); width < 4; width++ {
+		problem := bitvecsat.Problem{}
+		a := problem.AddNewVector((1 << width) - 1)
+		w := problem.AddNewVector(width)
+
+		bitvecsat.HammingWeightConstrain{AIndex: a, WeightIndex: w}.AddToProblem(&problem)
+
+		testBinaryRelation(t, (1 << width) - 1, a, w, problem, relationPopcount)
+		fmt.Println()
+	}
 }

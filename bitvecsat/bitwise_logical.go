@@ -1,7 +1,6 @@
 package bitvecsat
 
 import (
-	"fmt"
 	"github.com/MichalPokorny/var/sat"
 )
 
@@ -44,7 +43,6 @@ func VectorsAreEqual(a Vector, b Vector) []sat.Clause {
 		bBit := b.SatVarIndices[i]
 		clauses = append(clauses, sat.BitsAlwaysEqual(aBit, bBit)...)
 	}
-	fmt.Println("VectorsAreEqual", clauses)
 	return clauses
 }
 

@@ -34,9 +34,10 @@ func (problem *Problem) GetBitsInAssignment(assignment sat.Assignment, vectorInd
 
 func (problem *Problem) GetValueInAssignment(assignment sat.Assignment, vectorIndex int) int {
 	value := 0
-	for i := len(problem.Vectors[vectorIndex].SatVarIndices) - 1; i >= 0; i-- {
+	vector := problem.Vectors[vectorIndex]
+	for i := len(vector.SatVarIndices) - 1; i >= 0; i-- {
 		value = value << 1
-		if assignment[problem.Vectors[vectorIndex].SatVarIndices[i]] {
+		if assignment[vector.SatVarIndices[i]] {
 			value = value | 1
 		}
 	}
@@ -56,6 +57,7 @@ type Problem struct {
 	Constrains []Constrain
 
 	LastSatVarIndex int
+	AlwaysZeroBitIndex *int
 }
 
 func (problem *Problem) AddNewVector(width uint) int {
@@ -83,6 +85,12 @@ func (problem *Problem) AddBoundVector(width uint, indices []int) int {
 	return len(problem.Vectors) - 1
 }
 
+func (problem *Problem) AddConstantVector(width uint, value int) int {
+	index := problem.AddNewVector(width)
+	problem.AddNewConstrain(LiteralConstrain{AIndex: index, Value: value})
+	return index
+}
+
 func (problem *Problem) AddNewConstrain(constrain Constrain) {
 	problem.Constrains = append(problem.Constrains, constrain)
 }
@@ -93,6 +101,29 @@ func (problem *Problem) MakeSatFormula() sat.Formula {
 		clauses = append(clauses, problem.Constrains[i].Materialize(problem)...)
 	}
 	return sat.Formula{Clauses: clauses}
+}
+
+func (problem *Problem) GetAlwaysZeroBitIndex() int {
+	if problem.AlwaysZeroBitIndex != nil {
+		return *problem.AlwaysZeroBitIndex
+	}
+
+	alwaysZeroVectorIndex := problem.AddConstantVector(1, 0)
+	problem.AlwaysZeroBitIndex = new(int)
+	*problem.AlwaysZeroBitIndex = problem.Vectors[alwaysZeroVectorIndex].SatVarIndices[0]
+	return *problem.AlwaysZeroBitIndex
+}
+
+func (problem *Problem) AddLeftExtendedVector(index int, width uint) int {
+	original := problem.Vectors[index]
+	if original.Width > width {
+		panic("left extension is not an extension")
+	}
+	vars := original.SatVarIndices
+	for i := uint(0); i < (width - original.Width); i++ {
+		vars = append(vars, problem.GetAlwaysZeroBitIndex())
+	}
+	return problem.AddBoundVector(width, vars)
 }
 
 // width of each vector
